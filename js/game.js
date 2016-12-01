@@ -73,7 +73,7 @@ function Fin() {
 	}
 	this.create = function() {
 		restart = function() {
-			this.game.state.start('game');
+			this.game.state.start('rps');
 		}
 		this.button = this.game.add.button(0, 50, 'restart', restart, this);
 	}
@@ -109,19 +109,48 @@ function RockPaperScissor() {
 
 	this.fightDone = false;
 	this.create = function() {
-		this.player = this.game.add.sprite(0,0,'rock');
+		this.player = this.game.add.sprite(25,0,'rock');
 		this.player.scale.setTo(0.05,0.05);
 
+		this.computer = this.game.add.sprite(w-100, 0,'rock');
+		this.computer.scale.setTo(0.05,0.05);
+
 		var fight = function() {
-			this.player.key == 'paper';
-			this.player.loadTexture('paper');
-			this.fightDone = true;
+			var g = new Game;
+			var state = this;
+			g.play(function(player, computer) {
+				var computerPick = this.computerThink();
+				computer.key = computerPick;
+				computer.loadTexture(computerPick);
+
+				var pick = this.computerThink();
+				player.key == pick;
+				player.loadTexture(pick);
+				
+				var pl = {
+					name: 'player',
+					option:  g.options.indexOf(player.key)
+				};
+				var pc = {
+					name: 'computer',
+					option: g.options.indexOf(computer.key)
+				}
+
+				if(g.fight(pl, pc).name == "player") {
+					console.log('player win');
+					state.fightDone = true;
+				}
+				
+
+
+			}, this.player, this.computer);
 		}
 		this.playbutton = this.game.add.button(130, h-200, 'fightbtn', fight, this);
 	}
 	this.update = function() {
 		if(this.fightDone) {
-			
+			this.state.start('game');
+			this.fightDone = false;
 		}
 	}
 	this.render = function() {}
