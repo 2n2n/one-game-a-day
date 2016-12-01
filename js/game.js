@@ -4,7 +4,9 @@ var h = 320;
 var game = new Phaser.Game(w,h, Phaser.AUTO, 'game');
 game.state.add('game', new Started);
 game.state.add('finish', new Fin);
-game.state.start('game');
+game.state.add('color', new Inherit);
+game.state.add('rps', new RockPaperScissor);
+game.state.start('rps');
 
 function Started() {
 	this.preload = function() {
@@ -30,7 +32,6 @@ function Started() {
 		this.food.create(0, h-30, 'food');
 		this.food.create(w-30, h-30, 'food');
 		this.food.create(w-30, 0, 'food');
-		
 		this.scoreText = this.game.add.text(5,3, this.score);
 	}
 	this.update = function() {
@@ -41,6 +42,10 @@ function Started() {
 		}, null, this);
 
 		if(this.score == 4) {
+			// if(this.player.key !== 'food')
+			// {
+			// 	this.player.loadTexture('food');
+			// }
 			this.game.state.start('finish');
 		}
 		if( this.cursor.up.isDown ) {
@@ -67,7 +72,57 @@ function Fin() {
 		this.game.load.spritesheet('restart', 'asset/start_restart_button.png', w, 88, 2, 168);
 	}
 	this.create = function() {
-		this.button = this.game.add.button(0, 50, 'restart');
+		restart = function() {
+			this.game.state.start('game');
+		}
+		this.button = this.game.add.button(0, 50, 'restart', restart, this);
 	}
 	this.render = function() {}
 }
+
+function Inherit() {
+	this.create = function() {
+		this.game.backgroundColor = "#fff";
+
+		var skel = this.game.make.graphics(0,0);
+		skel.beginFill(0xa9a904);
+		skel.lineStyle(1, 0xa9a904, 1);
+		skel.moveTo(0, 0);
+	    skel.lineTo(0, 10);
+	    skel.lineTo(10, 10);
+	    skel.endFill();
+	    // skel.lineTo(1700, 2000);
+
+		this.hero = this.game.make.sprite(0,0, skel.generateTexture());
+	}
+	this.update = function() {}
+	this.render = function() {}
+}
+
+function RockPaperScissor() {
+	this.preload = function() {
+		this.game.load.image('rock', 'asset/rock.png');
+		this.game.load.image('paper', 'asset/paper.png');
+		this.game.load.image('scissor', 'asset/scissor.png');
+		this.game.load.image('fightbtn', 'asset/fight.png');
+	}
+
+	this.fightDone = false;
+	this.create = function() {
+		this.player = this.game.add.sprite(0,0,'rock');
+		this.player.scale.setTo(0.05,0.05);
+
+		var fight = function() {
+			this.player.key == 'paper';
+			this.player.loadTexture('paper');
+			this.fightDone = true;
+		}
+		this.playbutton = this.game.add.button(130, h-200, 'fightbtn', fight, this);
+	}
+	this.update = function() {
+		if(this.fightDone) {
+			
+		}
+	}
+	this.render = function() {}
+} 
